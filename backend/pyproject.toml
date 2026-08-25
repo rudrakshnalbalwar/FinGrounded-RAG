@@ -1,3 +1,8 @@
+[build-systems]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
 [project]
 name = "document-copilot-backend"
 version = "0.1.0"
@@ -24,6 +29,7 @@ exclude-newer = "2026-08-25T00:00:00Z"
 
 [dependency-groups]
 dev = [
+    "ipykernel==7.3.0",
     "pytest==9.1.1",
     "ruff==0.16.4",
 ]
