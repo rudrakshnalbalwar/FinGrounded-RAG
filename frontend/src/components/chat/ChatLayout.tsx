@@ -1,70 +1,41 @@
-import { useState } from 'react'
-import type { ChatStatus } from 'ai'
-import { ArrowUp, Square } from 'lucide-react'
+import { Outlet, useParams } from 'react-router-dom'
 
-import { Button } from '@/components/ui/button'
+import { ThreadSidebar } from '@/components/chat/ThreadSidebar'
+import { ThreadsProvider } from '@/components/chat/ThreadsProvider'
 import {
-  PromptInput,
-  PromptInputAction,
-  PromptInputActions,
-  PromptInputTextarea,
-} from '@/components/ui/prompt-input'
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { useThreads } from '@/hooks/useThreads'
 
-type ChatInputProps = {
-  status: ChatStatus
-  onSend: (text: string) => void
-  onStop: () => void
-}
-
-export function ChatInput({ status, onSend, onStop }: ChatInputProps) {
-  const [input, setInput] = useState('')
-  const isBusy = status === 'submitted' || status === 'streaming'
-
-  function submit() {
-    const text = input.trim()
-    if (!text || isBusy) return
-    onSend(text)
-    setInput('')
-  }
+function ChatHeader() {
+  const { threadId } = useParams()
+  const { threads } = useThreads()
+  const activeThread = threads.find((thread) => thread.id === threadId)
 
   return (
-    <div className="bg-background px-4 pb-4">
-      <div className="mx-auto w-full max-w-3xl">
-        <PromptInput
-          value={input}
-          onValueChange={setInput}
-          isLoading={isBusy}
-          onSubmit={submit}
-          className="rounded-2xl"
-        >
-          <PromptInputTextarea placeholder="Ask about SEC filings…" />
-          <PromptInputActions className="justify-end pt-1">
-            {isBusy ? (
-              <PromptInputAction tooltip="Stop">
-                <Button type="button" size="icon" className="rounded-full" onClick={onStop}>
-                  <Square className="size-4 fill-current" />
-                </Button>
-              </PromptInputAction>
-            ) : (
-              <PromptInputAction tooltip="Send">
-                <Button
-                  type="button"
-                  size="icon"
-                  className="rounded-full"
-                  onClick={submit}
-                  disabled={input.trim() === ''}
-                  aria-label="Send message"
-                >
-                  <ArrowUp className="size-4" />
-                </Button>
-              </PromptInputAction>
-            )}
-          </PromptInputActions>
-        </PromptInput>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          Answers are grounded in SEC filings. Verify citations before relying on them.
-        </p>
-      </div>
-    </div>
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <SidebarTrigger className="text-muted-foreground" />
+      <span className="truncate text-sm font-medium text-foreground">
+        {activeThread?.title ?? 'Document Copilot'}
+      </span>
+    </header>
+  )
+}
+
+export function ChatLayout() {
+  return (
+    <ThreadsProvider>
+      <SidebarProvider>
+        <ThreadSidebar />
+        <SidebarInset className="flex h-svh min-h-0 flex-col">
+          <ChatHeader />
+          <div className="flex min-h-0 flex-1 flex-col">
+            <Outlet />
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </ThreadsProvider>
   )
 }
