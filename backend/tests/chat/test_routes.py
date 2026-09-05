@@ -1,6 +1,8 @@
 import uuid
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
+from collections.abc import Iterator
+
 
 import pytest
 from fastapi.testclient import TestClient
@@ -24,7 +26,7 @@ NOW = datetime(2026, 6, 5, 12, 0, 0, tzinfo=UTC)
 
 
 @pytest.fixture
-def client() -> TestClient:
+def client() -> Iterator[TestClient]:
     app.dependency_overrides[get_current_user] = lambda: TEST_USER
     app.dependency_overrides[get_access_token] = lambda: "test-token"
     with TestClient(app) as test_client:
